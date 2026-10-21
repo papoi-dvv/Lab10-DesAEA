@@ -1,0 +1,148 @@
+@model Reserva
+@{
+    ViewData["Title"] = "Nueva reserva";
+    var precios = ViewBag.Precios as Dictionary<int, decimal> ?? new Dictionary<int, decimal>();
+    var hoy = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+    var preciosJson = System.Text.Json.JsonSerializer.Serialize(precios);
+}
+
+<div class="encabezado">
+    <div>
+        <h1 class="h3">Nueva reserva</h1>
+        <div class="sub">La reserva se guarda en estado <span class="chip chip-pendiente">Pendiente</span></div>
+    </div>
+    <a asp-action="Disponibles" class="btn btn-outline-secondary">Ver disponibilidad</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="glass panel p-4">
+            <form asp-action="Create" method="post" id="frmReserva">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label asp-for="HuespedId" class="form-label">Huésped</label>
+                    <select asp-for="HuespedId" asp-items="(SelectList)ViewBag.Huespedes" class="form-select"
+                            data-val-required="Seleccione un huésped.">
+                        <option value="">-- Seleccione un huésped --</option>
+                    </select>
+                    <span asp-validation-for="HuespedId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="HabitacionId" class="form-label">Habitación</label>
+                    <select asp-for="HabitacionId" asp-items="(SelectList)ViewBag.Habitaciones" class="form-select" id="selHabitacion"
+                            data-val-required="Seleccione una habitación.">
+                        <option value="">-- Seleccione una habitación --</option>
+                    </select>
+                    <span asp-validation-for="HabitacionId" class="text-danger"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6 mb-3">
+                        <label asp-for="FechaIngreso" class="form-label">Fecha de ingreso</label>
+                        <input asp-for="FechaIngreso" type="date" class="form-control" id="txtIngreso"
+                               data-val-required="Indique la fecha de ingreso." />
+                        <span asp-validation-for="FechaIngreso" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label asp-for="FechaSalida" class="form-label">Fecha de salida</label>
+                        <input asp-for="FechaSalida" type="date" class="form-control" id="txtSalida"
+                               data-val-required="Indique la fecha de salida." />
+                        <span asp-validation-for="FechaSalida" class="text-danger"></span>
+                    </div>
+                </div>
+
+                @* Columna agregada al final del laboratorio:
+                   ALTER TABLE Reserva ADD Observaciones NVARCHAR(200) NULL; *@
+                <div class="mb-3">
+                    <label asp-for="Observaciones" class="form-label">Observaciones</label>
+                    <textarea asp-for="Observaciones" class="form-control" rows="3" maxlength="200"
+                              placeholder="Pedidos especiales del huésped (opcional)" id="txtObs"></textarea>
+                    <div class="form-text"><span id="contadorObs">0</span>/200 caracteres</div>
+                    <span asp-validation-for="Observaciones" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">🛎️ Registrar reserva</button>
+                <a asp-action="Index" class="btn btn-link">Cancelar</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="resumen">
+            <h2 class="h6 text-uppercase text-secondary mb-3" style="letter-spacing:.08em">Resumen</h2>
+            <dl>
+                <dt>Habitación</dt>
+                <dd id="rHabitacion">—</dd>
+
+                <dt>Precio por noche</dt>
+                <dd id="rPrecio">—</dd>
+
+                <dt>Noches</dt>
+                <dd id="rNoches">—</dd>
+
+                <dt class="pt-2 border-top border-light border-opacity-10">Total estimado</dt>
+                <dd class="granTotal pt-2 border-top border-light border-opacity-10" id="rTotal">S/ 0.00</dd>
+            </dl>
+            <p class="form-text mb-0 mt-3">
+                Se valida que la salida sea posterior al ingreso, que el ingreso no sea anterior a hoy
+                y que la habitación no esté reservada en ese rango.
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Resumen en vivo: noches y total estimado según la habitación y las fechas.
+        (function () {
+            const precios = @Html.Raw(preciosJson);
+            const sel = document.getElementById('selHabitacion');
+            const ing = document.getElementById('txtIngreso');
+            const sal = document.getElementById('txtSalida');
+            const fmt = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const HOY = '@hoy';
+
+            function actualizar() {
+                const opcion = sel.options[sel.selectedIndex];
+                document.getElementById('rHabitacion').textContent =
+                    sel.value ? opcion.textContent.split(' · ')[0] : '—';
+
+                const precio = precios[sel.value];
+                document.getElementById('rPrecio').textContent =
+                    precio ? 'S/ ' + fmt.format(precio) : '—';
+
+                let noches = 0;
+                if (ing.value && sal.value) {
+                    const dias = (new Date(sal.value) - new Date(ing.value)) / 86400000;
+                    if (dias > 0) noches = Math.round(dias);
+                }
+                document.getElementById('rNoches').textContent = noches || '—';
+                document.getElementById('rTotal').textContent =
+                    'S/ ' + fmt.format(noches * (precio || 0));
+
+                // Mismas reglas que valida el servidor, avisadas al instante
+                // y en español (el navegador mostraría su propio texto en inglés).
+                ing.setCustomValidity(ing.value && ing.value < HOY
+                    ? 'La fecha de ingreso no puede ser anterior a hoy.' : '');
+                sal.setCustomValidity(sal.value && ing.value && sal.value <= ing.value
+                    ? 'La fecha de salida debe ser posterior a la de ingreso.' : '');
+            }
+
+            [sel, ing, sal].forEach(el => {
+                el.addEventListener('change', actualizar);
+                el.addEventListener('input', actualizar);
+            });
+            actualizar();
+
+            // Contador de caracteres de Observaciones.
+            const obs = document.getElementById('txtObs');
+            const contador = document.getElementById('contadorObs');
+            const contar = () => contador.textContent = obs.value.length;
+            obs.addEventListener('input', contar);
+            contar();
+        })();
+    </script>
+}

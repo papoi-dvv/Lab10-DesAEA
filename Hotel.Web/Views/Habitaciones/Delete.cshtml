@@ -1,0 +1,42 @@
+@model Habitacion
+@{
+    ViewData["Title"] = $"Dar de baja la habitación {Model.Numero}";
+}
+
+<div class="encabezado">
+    <div>
+        <h1 class="h3">Dar de baja</h1>
+        <div class="sub">La habitación no se borra: queda con <code>Activo = 0</code> y deja de listarse.</div>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="glass panel p-4">
+            <div class="alert alert-advertencia">
+                ¿Seguro que desea dar de baja la habitación <strong>@Model.Numero</strong>?
+            </div>
+
+            <dl class="row mb-3">
+                <dt class="col-5 text-secondary fw-normal">Número</dt>
+                <dd class="col-7 text-end"><span class="cod-habitacion">@Model.Numero</span></dd>
+
+                <dt class="col-5 text-secondary fw-normal">Tipo</dt>
+                <dd class="col-7 text-end"><span class="chip chip-tipo">@Model.TipoHabitacion.Nombre</span></dd>
+
+                <dt class="col-5 text-secondary fw-normal">Precio por noche</dt>
+                <dd class="col-7 text-end numero">S/ @Model.TipoHabitacion.PrecioNoche.ToString("N2")</dd>
+
+                <dt class="col-5 text-secondary fw-normal">Piso</dt>
+                <dd class="col-7 text-end numero">@Model.Piso</dd>
+            </dl>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="HabitacionId" />
+                <button type="submit" class="btn btn-danger">Sí, dar de baja</button>
+                <a asp-action="Index" class="btn btn-link">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>

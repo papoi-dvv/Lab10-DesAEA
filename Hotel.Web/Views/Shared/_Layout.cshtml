@@ -1,0 +1,72 @@
+﻿@{
+    var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
+    var accion = ViewContext.RouteData.Values["action"]?.ToString();
+    string Activo(string c, string? a = null) =>
+        controlador == c && (a is null || accion == a) ? "nav-link activo" : "nav-link";
+}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#080c17" />
+    <title>@ViewData["Title"] - Hotel</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <canvas id="luces" aria-hidden="true"></canvas>
+
+    <header>
+        <nav class="navbar navbar-expand-md">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-controller="Habitaciones" asp-action="Index"><span class="logo">🏨</span> Hotel</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal"
+                        aria-controls="menuPrincipal" aria-expanded="false" aria-label="Mostrar u ocultar el menú">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse" id="menuPrincipal">
+                    <ul class="navbar-nav ms-md-3 gap-md-1">
+                        <li class="nav-item">
+                            <a class="@Activo("Habitaciones")" asp-controller="Habitaciones" asp-action="Index">Habitaciones</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="@Activo("Reservas", "Disponibles")" asp-controller="Reservas" asp-action="Disponibles">Disponibilidad</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="@(controlador == "Reservas" && accion != "Disponibles" ? "nav-link activo" : "nav-link")"
+                               asp-controller="Reservas" asp-action="Index">Reservas</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container">&copy; 2026 - Hotel.Web · EF Core Database First</div>
+    </footer>
+
+    <div id="toasts" aria-live="polite" aria-atomic="false"></div>
+    @if (TempData["Mensaje"] is string mensaje)
+    {
+        <div id="toast-inicial" hidden
+             data-tipo="@(TempData["Tipo"] as string ?? "creado")"
+             data-titulo="@(TempData["Titulo"] as string)"
+             data-mensaje="@mensaje"></div>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/luces.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

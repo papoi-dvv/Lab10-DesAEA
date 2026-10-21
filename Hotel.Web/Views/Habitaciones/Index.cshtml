@@ -1,0 +1,99 @@
+@model IEnumerable<Habitacion>
+@{
+    ViewData["Title"] = "Habitaciones";
+    var habitaciones = Model.ToList();
+    var tipoFiltro = ViewData["TipoFiltro"] as int?;
+    var activas = (int)(ViewData["TotalActivas"] ?? 0);
+    var ocupadas = (int)(ViewData["OcupadasHoy"] ?? 0);
+}
+
+<div class="encabezado">
+    <div>
+        <h1 class="h3">Habitaciones</h1>
+        <div class="sub">Solo se listan las habitaciones activas (la baja es lógica: <code>Activo = 0</code>).</div>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">＋ Nueva habitación</a>
+</div>
+
+<div class="kpis">
+    <div class="kpi oro">
+        <div class="valor"><span data-contar="@activas">0</span></div>
+        <div class="rotulo">Activas</div>
+    </div>
+    <div class="kpi rojo">
+        <div class="valor"><span data-contar="@ocupadas">0</span></div>
+        <div class="rotulo">Ocupadas hoy</div>
+    </div>
+    <div class="kpi verde">
+        <div class="valor"><span data-contar="@(activas - ocupadas)">0</span></div>
+        <div class="rotulo">Libres hoy</div>
+    </div>
+    <div class="kpi azul">
+        <div class="valor"><span data-contar="@habitaciones.Count">0</span></div>
+        <div class="rotulo">En el filtro</div>
+    </div>
+</div>
+
+<form asp-action="Index" method="get" class="row g-2 mb-3 align-items-end">
+    <div class="col-sm-6 col-md-4">
+        <label for="tipoHabitacionId" class="form-label">Tipo de habitación</label>
+        <select id="tipoHabitacionId" name="tipoHabitacionId" class="form-select" asp-items="(SelectList)ViewBag.Tipos">
+            <option value="">Todos los tipos</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+        @if (tipoFiltro.HasValue)
+        {
+            <a asp-action="Index" class="btn btn-link">Quitar filtro</a>
+        }
+    </div>
+</form>
+
+<div class="glass panel">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Tipo</th>
+                    <th class="text-end">Precio / noche</th>
+                    <th class="text-center">Capacidad</th>
+                    <th class="text-center">Piso</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (var i = 0; i < habitaciones.Count; i++)
+                {
+                    var h = habitaciones[i];
+                    <tr style="--i:@i">
+                        <td><span class="cod-habitacion">@h.Numero</span></td>
+                        <td><span class="chip chip-tipo">@h.TipoHabitacion.Nombre</span></td>
+                        <td class="text-end numero">S/ @h.TipoHabitacion.PrecioNoche.ToString("N2")</td>
+                        <td class="text-center numero">@h.TipoHabitacion.Capacidad @(h.TipoHabitacion.Capacidad == 1 ? "persona" : "personas")</td>
+                        <td class="text-center numero">@h.Piso</td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Details" asp-route-id="@h.HabitacionId" class="btn btn-sm btn-outline-secondary">Detalle</a>
+                            <a asp-action="Edit" asp-route-id="@h.HabitacionId" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <a asp-action="Delete" asp-route-id="@h.HabitacionId" class="btn btn-sm btn-outline-danger">Dar de baja</a>
+                        </td>
+                    </tr>
+                }
+                @if (habitaciones.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6">
+                            <div class="vacio">
+                                <span class="icono">🛏️</span>
+                                @(tipoFiltro.HasValue
+                                    ? "No hay habitaciones activas de ese tipo."
+                                    : "Todavía no hay habitaciones registradas.")
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

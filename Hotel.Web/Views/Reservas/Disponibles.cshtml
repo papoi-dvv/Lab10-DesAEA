@@ -1,0 +1,110 @@
+@model DisponibilidadViewModel
+@{
+    ViewData["Title"] = "Disponibilidad";
+}
+
+<div class="encabezado">
+    <div>
+        <h1 class="h3">Disponibilidad</h1>
+        <div class="sub">Habitaciones activas libres en el rango indicado, con noches y total estimado.</div>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">Ver reservas</a>
+</div>
+
+<form asp-action="Disponibles" method="get" class="glass panel p-4 mb-3">
+    <div class="row g-3 align-items-end">
+        <div class="col-sm-4">
+            <label asp-for="Ingreso" class="form-label">Fecha de ingreso</label>
+            <input asp-for="Ingreso" type="date" class="form-control" />
+        </div>
+        <div class="col-sm-4">
+            <label asp-for="Salida" class="form-label">Fecha de salida</label>
+            <input asp-for="Salida" type="date" class="form-control" />
+            <span asp-validation-for="Salida" class="text-danger"></span>
+        </div>
+        <div class="col-sm-4">
+            <button type="submit" class="btn btn-primary w-100">🔍 Buscar disponibilidad</button>
+        </div>
+    </div>
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-peligro mt-3 mb-0">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+</form>
+
+@if (Model.Buscado)
+{
+    var ing = Model.Ingreso!.Value;
+    var sal = Model.Salida!.Value;
+
+    <div class="kpis">
+        <div class="kpi azul">
+            <div class="valor"><span data-contar="@Model.Noches">0</span></div>
+            <div class="rotulo">Noche@(Model.Noches == 1 ? "" : "s")</div>
+        </div>
+        <div class="kpi verde">
+            <div class="valor"><span data-contar="@Model.Habitaciones.Count">0</span></div>
+            <div class="rotulo">Habitaciones libres</div>
+        </div>
+        <div class="kpi oro">
+            <div class="valor">S/ <span data-contar="@(Model.Noches * Model.PrecioMinimo)" data-decimales="2">0</span></div>
+            <div class="rotulo">Desde (total)</div>
+        </div>
+    </div>
+
+    @if (Model.Habitaciones.Count == 0)
+    {
+        <div class="glass panel p-4">
+            <div class="vacio">
+                <span class="icono">🚫</span>
+                No hay habitaciones libres entre el @ing.ToString("dd/MM/yyyy")
+                y el @sal.ToString("dd/MM/yyyy"). Pruebe con otras fechas.
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="rejilla">
+            @for (var i = 0; i < Model.Habitaciones.Count; i++)
+            {
+                var h = Model.Habitaciones[i];
+                var total = Model.TotalEstimado(h);
+                var barata = Model.Habitaciones.Count > 1 && h.PrecioNoche == Model.PrecioMinimo;
+                <article class="tarjeta-hab @(barata ? "barata" : "")" style="--i:@i">
+                    <div class="cabecera">
+                        <span class="num">@h.Numero</span>
+                        <span class="chip chip-tipo">@h.Tipo</span>
+                    </div>
+                    <div class="datos">
+                        <span>🏢 Piso @h.Piso</span>
+                        <span>👥 @h.Capacidad @(h.Capacidad == 1 ? "persona" : "personas")</span>
+                        <span>💲 S/ @h.PrecioNoche.ToString("N2") / noche</span>
+                    </div>
+                    <div class="total">
+                        <div class="cifra">S/ @total.ToString("N2")</div>
+                        <div class="detalle d-flex align-items-center flex-wrap gap-2">
+                            <span>
+                                @Model.Noches noche@(Model.Noches == 1 ? "" : "s") ·
+                                @ing.ToString("dd/MM") → @sal.ToString("dd/MM")
+                            </span>
+                            @if (barata)
+                            {
+                                <span class="chip chip-mejor">Mejor precio</span>
+                            }
+                        </div>
+                        <a class="btn btn-success w-100 mt-3"
+                           asp-action="Create"
+                           asp-route-habitacionId="@h.HabitacionId"
+                           asp-route-ingreso="@ing.ToString("yyyy-MM-dd")"
+                           asp-route-salida="@sal.ToString("yyyy-MM-dd")">Reservar</a>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+}

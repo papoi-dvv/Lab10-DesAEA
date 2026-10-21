@@ -1,0 +1,566 @@
+/* =====================================================================
+   Hotel.Web – tema "liquid glass" sobre Bootstrap 5.3 (modo oscuro)
+   Paleta: azul noche + dorado de recepción.
+   ===================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --fondo: #080c17;
+  --texto: #f1ece2;
+  --texto-suave: rgba(241, 236, 226, .62);
+  --acento: #e9c46a;
+  --acento-2: #2a9d8f;
+
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .035));
+  --glass-bg-suave: rgba(255, 255, 255, .055);
+  --glass-borde: rgba(255, 255, 255, .2);
+  --glass-brillo: rgba(255, 255, 255, .36);
+  --glass-sombra: 0 14px 44px rgba(0, 0, 0, .42);
+  --radio: 22px;
+  --radio-sm: 14px;
+
+  --ok: #34d399;
+  --info: #60a5fa;
+  --peligro: #f87171;
+  --aviso: #fbbf24;
+  --oro: #e9c46a;
+
+  --bs-body-color: var(--texto);
+  --bs-secondary-color: var(--texto-suave);
+  --bs-border-color: var(--glass-borde);
+  --bs-link-color: var(--acento);
+  --bs-link-hover-color: #f7e2b0;
+}
+
+/* ---------- Base ---------- */
+/* El degradado vive en <html> y el <body> es transparente: así el canvas de las
+   luces (z-index: -1) queda entre el fondo y el contenido. */
+html {
+  min-height: 100%;
+  background-color: var(--fondo);
+  background-image:
+    radial-gradient(1100px 700px at 10% -10%, rgba(233, 196, 106, .22), transparent 60%),
+    radial-gradient(900px 620px at 100% 6%, rgba(42, 157, 143, .26), transparent 58%),
+    radial-gradient(1000px 820px at 50% 120%, rgba(38, 70, 143, .34), transparent 64%);
+  background-attachment: fixed;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--texto);
+  background: transparent;
+}
+
+main {
+  flex: 1;
+  animation: pagina-entra .6s cubic-bezier(.2, .8, .2, 1) backwards;
+}
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, .h1, h2, .h2, h3, .h3 { letter-spacing: -.01em; }
+
+::selection { background: rgba(233, 196, 106, .4); }
+
+#luces {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ---------- Liquid glass ---------- */
+.glass,
+.navbar,
+.modal-content {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid var(--glass-borde);
+  box-shadow:
+    var(--glass-sombra),
+    inset 0 1px 0 var(--glass-brillo),
+    inset 0 -1px 0 rgba(255, 255, 255, .05);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass, .navbar, .modal-content, .toast-glass { background: rgba(23, 29, 48, .93); }
+}
+
+.panel {
+  border-radius: var(--radio);
+  padding: .85rem 1.1rem;
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+  --bs-navbar-color: var(--texto-suave);
+  margin: .9rem auto 1.4rem;
+  width: min(1180px, calc(100% - 1.6rem));
+  border-radius: 999px;
+  padding: .45rem 1rem;
+  position: sticky;
+  top: .8rem;
+  z-index: 1030;
+  animation: nav-baja .7s cubic-bezier(.2, .9, .3, 1.2) both;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--texto) !important;
+}
+.navbar-brand .logo {
+  display: inline-block;
+  transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+}
+.navbar-brand:hover .logo { transform: rotate(-12deg) scale(1.2); }
+
+.navbar .nav-link {
+  color: var(--texto-suave) !important;
+  border-radius: 999px;
+  padding: .4rem .95rem !important;
+  transition: background .25s, color .25s;
+}
+.navbar .nav-link:hover {
+  color: var(--texto) !important;
+  background: rgba(255, 255, 255, .1);
+  text-decoration: none;
+}
+.navbar .nav-link.activo {
+  color: #1b1403 !important;
+  background: linear-gradient(135deg, #f3d184, #d9a93f);
+  box-shadow: 0 4px 16px rgba(233, 196, 106, .4), inset 0 1px 0 rgba(255, 255, 255, .55);
+  font-weight: 600;
+}
+
+.navbar-toggler {
+  border-color: var(--glass-borde);
+  filter: invert(1) brightness(1.4);
+}
+
+/* ---------- Títulos de página ---------- */
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+}
+.encabezado h1 {
+  margin: 0;
+  font-weight: 700;
+  background: linear-gradient(90deg, #fff, #f3d184 55%, #7fd3c7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.encabezado .sub { font-size: .85rem; color: var(--texto-suave); margin-top: .15rem; }
+
+/* ---------- Botones ---------- */
+.btn {
+  border-radius: 999px;
+  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s, background .25s, border-color .25s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: scale(.95); }
+
+.btn-primary {
+  --bs-btn-border-color: transparent;
+  border: 0;
+  color: #1b1403;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f3d184, #d9a93f);
+  box-shadow: 0 6px 22px rgba(233, 196, 106, .4), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+.btn-primary:hover, .btn-primary:focus-visible {
+  color: #1b1403;
+  background: linear-gradient(135deg, #f8dd9d, #e8bc55);
+  box-shadow: 0 8px 28px rgba(233, 196, 106, .55), inset 0 1px 0 rgba(255, 255, 255, .6);
+}
+
+.btn-success {
+  border: 0;
+  color: #04201c;
+  font-weight: 600;
+  background: linear-gradient(135deg, #5ed2c3, #1f8c80);
+  box-shadow: 0 6px 22px rgba(42, 157, 143, .38), inset 0 1px 0 rgba(255, 255, 255, .4);
+}
+.btn-success:hover { color: #04201c; background: linear-gradient(135deg, #74dccf, #27a295); }
+
+.btn-danger {
+  border: 0;
+  background: linear-gradient(135deg, #fb7185, #e11d48);
+  box-shadow: 0 6px 22px rgba(225, 29, 72, .38), inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+
+.btn[class*="btn-outline-"] {
+  background: rgba(255, 255, 255, .05);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.btn-outline-secondary { --bs-btn-color: #e4dccd; --bs-btn-border-color: rgba(255, 255, 255, .26); --bs-btn-hover-bg: rgba(255, 255, 255, .16); --bs-btn-hover-border-color: rgba(255, 255, 255, .45); --bs-btn-hover-color: #fff; }
+.btn-outline-primary   { --bs-btn-color: #f3d184; --bs-btn-border-color: rgba(233, 196, 106, .55); --bs-btn-hover-bg: rgba(233, 196, 106, .28); --bs-btn-hover-border-color: var(--oro); --bs-btn-hover-color: #fff; }
+.btn-outline-danger    { --bs-btn-color: #fda4af; --bs-btn-border-color: rgba(248, 113, 113, .55); --bs-btn-hover-bg: rgba(225, 29, 72, .4); --bs-btn-hover-border-color: #f87171; --bs-btn-hover-color: #fff; }
+.btn-outline-success   { --bs-btn-color: #6ee7b7; --bs-btn-border-color: rgba(52, 211, 153, .5); --bs-btn-hover-bg: rgba(16, 185, 129, .35); --bs-btn-hover-border-color: #34d399; --bs-btn-hover-color: #fff; }
+.btn-link { color: var(--acento); }
+
+.btn-sm { padding: .25rem .7rem; font-size: .8rem; }
+
+/* ---------- Formularios ---------- */
+.form-control,
+.form-select {
+  background-color: rgba(255, 255, 255, .07);
+  border: 1px solid var(--glass-borde);
+  border-radius: var(--radio-sm);
+  color: var(--texto);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+  transition: border-color .25s, box-shadow .25s, background .25s;
+}
+.form-control::placeholder { color: rgba(241, 236, 226, .4); }
+.form-control:focus,
+.form-select:focus {
+  background-color: rgba(255, 255, 255, .12);
+  border-color: var(--acento);
+  color: #fff;
+  box-shadow: 0 0 0 .22rem rgba(233, 196, 106, .25), inset 0 1px 0 rgba(255, 255, 255, .2);
+}
+.form-select option { background: #151b2e; color: #fff; }
+.form-label { color: var(--texto-suave); font-size: .85rem; font-weight: 500; }
+.form-text { color: var(--texto-suave); }
+/* Icono del selector de fecha visible en modo oscuro. */
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) brightness(1.6); cursor: pointer; }
+
+.text-danger { color: #fda4af !important; }
+.field-validation-error { font-size: .85rem; display: block; margin-top: .25rem; }
+.input-validation-error { border-color: var(--peligro) !important; }
+.validation-summary-errors ul { margin: 0; padding-left: 1.1rem; }
+
+/* ---------- Tablas ---------- */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--texto);
+  --bs-table-striped-bg: rgba(255, 255, 255, .03);
+  --bs-table-striped-color: var(--texto);
+  --bs-table-hover-bg: rgba(255, 255, 255, .1);
+  --bs-table-hover-color: #fff;
+  --bs-table-border-color: rgba(255, 255, 255, .08);
+  margin-bottom: 0;
+}
+.table > thead th {
+  color: var(--texto-suave);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-bottom-width: 1px;
+  white-space: nowrap;
+}
+.table > :not(caption) > * > * { padding: .8rem .75rem; }
+.numero { font-variant-numeric: tabular-nums; }
+
+tbody tr {
+  animation: fila-entra .55s cubic-bezier(.2, .8, .2, 1) both;
+  animation-delay: calc(var(--i, 0) * 32ms + 120ms);
+}
+
+.cod-habitacion {
+  display: inline-grid;
+  place-items: center;
+  min-width: 3.1rem;
+  padding: .3rem .55rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #1b1403;
+  background: linear-gradient(135deg, #f3d184, #d9a93f);
+  box-shadow: 0 4px 14px rgba(233, 196, 106, .3), inset 0 1px 0 rgba(255, 255, 255, .6);
+}
+
+/* ---------- Chips de estado ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .3em .75em;
+  border-radius: 999px;
+  font-size: .74rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.chip-pendiente  { color: #fde68a; background: rgba(251, 191, 36, .16); border-color: rgba(251, 191, 36, .5); }
+.chip-confirmada { color: #a7f3d0; background: rgba(16, 185, 129, .18); border-color: rgba(52, 211, 153, .5); }
+.chip-cancelada  { color: #fecdd3; background: rgba(244, 63, 94, .18); border-color: rgba(251, 113, 133, .5); }
+.chip-finalizada { color: #c7d2fe; background: rgba(129, 140, 248, .18); border-color: rgba(165, 180, 252, .5); }
+.chip-tipo       { color: #f3d184; background: rgba(233, 196, 106, .14); border-color: rgba(233, 196, 106, .45); }
+.chip-neutro     { color: var(--texto-suave); background: rgba(255, 255, 255, .07); border-color: rgba(255, 255, 255, .18); }
+
+/* ---------- KPIs ---------- */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: .75rem;
+  margin-bottom: 1.1rem;
+}
+.kpi {
+  border-radius: var(--radio-sm);
+  padding: .75rem .95rem;
+  background: var(--glass-bg-suave);
+  border: 1px solid rgba(255, 255, 255, .13);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
+}
+.kpi .valor { font-size: 1.65rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.kpi .rotulo { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-suave); }
+.kpi.oro .valor  { color: var(--oro); }
+.kpi.verde .valor { color: #6ee7b7; }
+.kpi.rojo .valor { color: #fda4af; }
+.kpi.azul .valor { color: #a5b4fc; }
+
+/* ---------- Tarjetas de disponibilidad ---------- */
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+  gap: .9rem;
+}
+.tarjeta-hab {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radio);
+  padding: 1rem 1.1rem;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+  backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid var(--glass-borde);
+  box-shadow: var(--glass-sombra), inset 0 1px 0 var(--glass-brillo);
+  animation: fila-entra .55s cubic-bezier(.2, .8, .2, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms + 100ms);
+  transition: transform .3s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s, border-color .3s;
+}
+.tarjeta-hab:hover {
+  transform: translateY(-4px);
+  border-color: rgba(233, 196, 106, .55);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, .5), 0 0 0 1px rgba(233, 196, 106, .35), inset 0 1px 0 var(--glass-brillo);
+}
+.tarjeta-hab .cabecera { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.tarjeta-hab .num { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tarjeta-hab .datos { margin: .6rem 0 .2rem; font-size: .82rem; color: var(--texto-suave); display: flex; flex-wrap: wrap; gap: .25rem .8rem; }
+.tarjeta-hab .total { margin-top: .7rem; padding-top: .7rem; border-top: 1px solid rgba(255, 255, 255, .11); }
+.tarjeta-hab .total .cifra { font-size: 1.3rem; font-weight: 700; color: var(--oro); font-variant-numeric: tabular-nums; }
+.tarjeta-hab .total .detalle { font-size: .76rem; color: var(--texto-suave); }
+.tarjeta-hab.barata { border-color: rgba(42, 157, 143, .5); }
+.chip-mejor {
+  color: #04201c;
+  background: linear-gradient(135deg, #5ed2c3, #1f8c80);
+  border-color: transparent;
+  font-size: .64rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px rgba(42, 157, 143, .35), inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+
+/* ---------- Resumen del formulario de reserva ---------- */
+.resumen {
+  border-radius: var(--radio-sm);
+  padding: .9rem 1rem;
+  background: var(--glass-bg-suave);
+  border: 1px solid rgba(255, 255, 255, .14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16);
+}
+.resumen dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: .45rem .8rem; }
+.resumen dt { font-size: .8rem; color: var(--texto-suave); font-weight: 400; }
+.resumen dd { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.resumen .granTotal { font-size: 1.35rem; color: var(--oro); }
+
+/* ---------- Línea de tiempo (detalle de la habitación) ---------- */
+.linea-tiempo { list-style: none; margin: 0; padding: 0; }
+.tl-item { position: relative; display: flex; gap: .95rem; padding-bottom: 1rem; animation: fila-entra .5s both; }
+.tl-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 21px;
+  top: 46px;
+  bottom: -2px;
+  width: 2px;
+  background: linear-gradient(rgba(255, 255, 255, .32), rgba(255, 255, 255, .04));
+}
+.avatar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: .9rem;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+.av-0 { background: linear-gradient(135deg, #e9c46a, #b4791c); }
+.av-1 { background: linear-gradient(135deg, #2a9d8f, #10625a); }
+.av-2 { background: linear-gradient(135deg, #f472b6, #9d174d); }
+.av-3 { background: linear-gradient(135deg, #818cf8, #3730a3); }
+.av-4 { background: linear-gradient(135deg, #38bdf8, #0369a1); }
+.av-5 { background: linear-gradient(135deg, #fb923c, #9a3412); }
+
+.tl-tarjeta {
+  flex: 1;
+  min-width: 0;
+  border-radius: var(--radio-sm);
+  padding: .7rem .9rem;
+  background: var(--glass-bg-suave);
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14);
+  transition: background .25s, transform .25s;
+}
+.tl-tarjeta:hover { background: rgba(255, 255, 255, .1); transform: translateX(3px); }
+.tl-titulo { font-weight: 600; color: #fff; }
+.tl-sub { font-size: .79rem; color: var(--texto-suave); }
+.vacio { text-align: center; color: var(--texto-suave); padding: 2rem 0; }
+.vacio .icono { font-size: 2.2rem; display: block; margin-bottom: .4rem; opacity: .75; }
+
+.alert { border-radius: var(--radio-sm); }
+.alert-advertencia { border: 1px solid rgba(251, 191, 36, .45); background: rgba(251, 191, 36, .13); color: #fde68a; }
+.alert-peligro { border: 1px solid rgba(248, 113, 113, .45); background: rgba(244, 63, 94, .14); color: #fecdd3; }
+
+/* ---------- Modal ---------- */
+.modal {
+  --bs-modal-border-radius: 26px;
+  --bs-modal-header-border-width: 0;
+  --bs-modal-bg: transparent;
+}
+.modal-content { border-radius: 26px; }
+.modal-header { border-bottom: 1px solid rgba(255, 255, 255, .12); }
+.btn-close { filter: invert(1) grayscale(1) brightness(1.8); opacity: .75; transition: transform .3s; }
+.btn-close:hover { transform: rotate(90deg); opacity: 1; }
+
+.modal.fade .modal-dialog {
+  opacity: 0;
+  transform: scale(.92) translateY(24px);
+  transition: transform .45s cubic-bezier(.34, 1.56, .64, 1), opacity .3s ease;
+}
+.modal.show .modal-dialog { opacity: 1; transform: none; }
+
+.modal-backdrop {
+  --bs-backdrop-bg: rgba(4, 7, 20, .6);
+  --bs-backdrop-opacity: 1;
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+/* ---------- Notificaciones (toasts) ---------- */
+#toasts {
+  position: fixed;
+  top: 5.4rem;
+  right: 1rem;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+  width: min(390px, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.toast-glass {
+  --tc: var(--ok);
+  --dur: 5.5s;
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: .8rem;
+  align-items: start;
+  padding: .85rem .9rem .95rem;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(190%);
+  backdrop-filter: blur(24px) saturate(190%);
+  border: 1px solid var(--glass-borde);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, .45), 0 0 0 1px color-mix(in srgb, var(--tc) 35%, transparent), inset 0 1px 0 var(--glass-brillo);
+  animation: toast-entra .6s cubic-bezier(.34, 1.56, .64, 1) both;
+}
+.toast-glass.saliendo { animation: toast-sale .35s ease-in both; }
+.toast-glass::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--tc), transparent);
+  transform-origin: left;
+  animation: toast-barra var(--dur) linear forwards;
+}
+.toast-glass:hover::after { animation-play-state: paused; }
+
+.toast-glass .t-icono {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  background: color-mix(in srgb, var(--tc) 24%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tc) 55%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--tc) 40%, transparent);
+}
+.toast-glass .t-titulo { font-weight: 700; font-size: .92rem; line-height: 1.25; }
+.toast-glass .t-mensaje { font-size: .82rem; color: var(--texto-suave); margin-top: .1rem; overflow-wrap: anywhere; }
+.toast-glass .t-cerrar {
+  border: 0;
+  background: transparent;
+  color: var(--texto-suave);
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: .1rem .3rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.toast-glass .t-cerrar:hover { background: rgba(255, 255, 255, .15); color: #fff; }
+
+.tipo-creado      { --tc: var(--ok); }
+.tipo-editado     { --tc: var(--info); }
+.tipo-eliminado   { --tc: var(--peligro); }
+.tipo-reserva     { --tc: var(--oro); }
+.tipo-cancelado   { --tc: #fb7185; }
+.tipo-advertencia { --tc: var(--aviso); }
+.tipo-error       { --tc: var(--peligro); }
+
+/* ---------- Pie ---------- */
+.footer {
+  margin-top: 2rem;
+  padding: 1.1rem 0 1.4rem;
+  color: var(--texto-suave);
+  font-size: .85rem;
+  text-align: center;
+}
+
+/* ---------- Animaciones ---------- */
+@keyframes pagina-entra { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes nav-baja     { from { opacity: 0; transform: translateY(-26px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes fila-entra   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes toast-entra  { from { opacity: 0; transform: translateX(120%) scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes toast-sale   { to { opacity: 0; transform: translateX(110%) scale(.95); } }
+@keyframes toast-barra  { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+@media (max-width: 767.98px) {
+  .navbar { border-radius: 26px; }
+  #toasts { top: auto; bottom: 1rem; right: 50%; transform: translateX(50%); }
+  @keyframes toast-entra { from { opacity: 0; transform: translateY(60px) scale(.92); } to { opacity: 1; transform: none; } }
+  @keyframes toast-sale  { to { opacity: 0; transform: translateY(60px) scale(.95); } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; transition-duration: .01ms !important; }
+  .toast-glass::after { animation-duration: var(--dur) !important; }
+  #luces { display: none; }
+}

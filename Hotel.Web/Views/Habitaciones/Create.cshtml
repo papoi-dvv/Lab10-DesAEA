@@ -1,0 +1,85 @@
+@model Habitacion
+@{
+    ViewData["Title"] = "Nueva habitación";
+    var tipos = ViewBag.ListaTipos as List<TipoHabitacion> ?? new List<TipoHabitacion>();
+}
+
+<div class="encabezado">
+    <div>
+        <h1 class="h3">Nueva habitación</h1>
+        <div class="sub">El número de habitación no se puede repetir.</div>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="glass panel p-4">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Numero" class="form-label">Número</label>
+                    <input asp-for="Numero" class="form-control" maxlength="10" placeholder="Ej. 405" autofocus
+                           data-val-required="Indique el número de la habitación." />
+                    <span asp-validation-for="Numero" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="TipoHabitacionId" class="form-label">Tipo de habitación</label>
+                    <select asp-for="TipoHabitacionId" asp-items="(SelectList)ViewBag.Tipos" class="form-select" id="selTipo"
+                            data-val-required="Seleccione un tipo de habitación.">
+                        <option value="">-- Seleccione un tipo --</option>
+                    </select>
+                    <span asp-validation-for="TipoHabitacionId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Piso" class="form-label">Piso</label>
+                    <input asp-for="Piso" class="form-control" type="number" min="1" max="50"
+                           data-val-required="Indique el piso." />
+                    <span asp-validation-for="Piso" class="text-danger"></span>
+                    <div class="form-text">Entre 1 y 50.</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" class="btn btn-link">Cancelar</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="glass panel p-4">
+            <h2 class="h6 text-uppercase text-secondary" style="letter-spacing:.08em">Tarifas vigentes</h2>
+            <table class="table table-sm align-middle mt-2">
+                <tbody>
+                    @foreach (var t in tipos)
+                    {
+                        <tr data-tipo="@t.TipoHabitacionId">
+                            <td><span class="chip chip-tipo">@t.Nombre</span></td>
+                            <td class="text-secondary">@t.Capacidad @(t.Capacidad == 1 ? "persona" : "personas")</td>
+                            <td class="text-end numero">S/ @t.PrecioNoche.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <p class="form-text mb-0">El precio por noche lo define el tipo de habitación.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Resalta la tarifa del tipo elegido.
+        (function () {
+            const sel = document.getElementById('selTipo');
+            if (!sel) return;
+            const marcar = () => document.querySelectorAll('tr[data-tipo]').forEach(function (fila) {
+                fila.classList.toggle('table-active', fila.dataset.tipo === sel.value);
+            });
+            sel.addEventListener('change', marcar);
+            marcar();
+        })();
+    </script>
+}

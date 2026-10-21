@@ -1,0 +1,103 @@
+@model Habitacion
+@{
+    ViewData["Title"] = $"Habitación {Model.Numero}";
+    var reservas = ViewData["Reservas"] as List<Reserva> ?? new List<Reserva>();
+    var hoy = DateOnly.FromDateTime(DateTime.Today);
+    var ocupadaHoy = reservas.Any(r => r.Estado != "Cancelada" && r.FechaIngreso <= hoy && r.FechaSalida > hoy);
+
+    string ClaseChip(string estado) => estado switch
+    {
+        "Pendiente" => "chip chip-pendiente",
+        "Confirmada" => "chip chip-confirmada",
+        "Cancelada" => "chip chip-cancelada",
+        _ => "chip chip-finalizada"
+    };
+}
+
+<div class="encabezado">
+    <div>
+        <h1 class="h3">Habitación @Model.Numero</h1>
+        <div class="sub">@Model.TipoHabitacion.Nombre · piso @Model.Piso</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.HabitacionId" class="btn btn-outline-primary">Editar</a>
+        <a asp-action="Index" class="btn btn-outline-secondary">← Volver</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="glass panel p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="cod-habitacion" style="font-size:1.2rem">@Model.Numero</span>
+                <span class="@(ocupadaHoy ? "chip chip-cancelada" : "chip chip-confirmada")">
+                    @(ocupadaHoy ? "Ocupada hoy" : "Libre hoy")
+                </span>
+            </div>
+            <dl class="row mb-0">
+                <dt class="col-6 text-secondary fw-normal">Tipo</dt>
+                <dd class="col-6 text-end"><span class="chip chip-tipo">@Model.TipoHabitacion.Nombre</span></dd>
+
+                <dt class="col-6 text-secondary fw-normal">Precio por noche</dt>
+                <dd class="col-6 text-end numero">S/ @Model.TipoHabitacion.PrecioNoche.ToString("N2")</dd>
+
+                <dt class="col-6 text-secondary fw-normal">Capacidad</dt>
+                <dd class="col-6 text-end numero">@Model.TipoHabitacion.Capacidad @(Model.TipoHabitacion.Capacidad == 1 ? "persona" : "personas")</dd>
+
+                <dt class="col-6 text-secondary fw-normal">Piso</dt>
+                <dd class="col-6 text-end numero">@Model.Piso</dd>
+
+                <dt class="col-6 text-secondary fw-normal">Situación</dt>
+                <dd class="col-6 text-end">
+                    <span class="@(Model.Activo ? "chip chip-confirmada" : "chip chip-cancelada")">
+                        @(Model.Activo ? "Activa" : "Dada de baja")
+                    </span>
+                </dd>
+            </dl>
+            <a asp-controller="Reservas" asp-action="Create" asp-route-habitacionId="@Model.HabitacionId"
+               class="btn btn-success w-100 mt-3">🛎️ Reservar esta habitación</a>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="glass panel p-4">
+            <h2 class="h6 text-uppercase text-secondary mb-3" style="letter-spacing:.08em">
+                Historial de reservas (@reservas.Count)
+            </h2>
+
+            @if (reservas.Count == 0)
+            {
+                <div class="vacio">
+                    <span class="icono">🗓️</span>
+                    Esta habitación todavía no tiene reservas.
+                </div>
+            }
+            else
+            {
+                <ul class="linea-tiempo">
+                    @for (var i = 0; i < reservas.Count; i++)
+                    {
+                        var r = reservas[i];
+                        var noches = r.FechaSalida.DayNumber - r.FechaIngreso.DayNumber;
+                        var iniciales = $"{r.Huesped.Nombres.FirstOrDefault()}{r.Huesped.Apellidos.FirstOrDefault()}".ToUpperInvariant();
+                        <li class="tl-item" style="animation-delay:@(i * 60 + 80)ms">
+                            <div class="avatar av-@(i % 6)" aria-hidden="true">@iniciales</div>
+                            <div class="tl-tarjeta">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div>
+                                        <div class="tl-titulo">@r.Huesped.Nombres @r.Huesped.Apellidos</div>
+                                        <div class="tl-sub">
+                                            @r.FechaIngreso.ToString("dd/MM/yyyy") → @r.FechaSalida.ToString("dd/MM/yyyy")
+                                            · @noches noche@(noches == 1 ? "" : "s")
+                                        </div>
+                                    </div>
+                                    <span class="@ClaseChip(r.Estado)">@r.Estado</span>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,54 @@
+@model Habitacion
+@{
+    ViewData["Title"] = $"Editar habitación {Model.Numero}";
+}
+
+<div class="encabezado">
+    <div>
+        <h1 class="h3">Editar habitación</h1>
+        <div class="sub">Habitación <span class="cod-habitacion">@Model.Numero</span></div>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">← Volver</a>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="glass panel p-4">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                <input type="hidden" asp-for="HabitacionId" />
+                <input type="hidden" asp-for="Activo" />
+
+                <div class="mb-3">
+                    <label asp-for="Numero" class="form-label">Número</label>
+                    <input asp-for="Numero" class="form-control" maxlength="10"
+                           data-val-required="Indique el número de la habitación." />
+                    <span asp-validation-for="Numero" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="TipoHabitacionId" class="form-label">Tipo de habitación</label>
+                    <select asp-for="TipoHabitacionId" asp-items="(SelectList)ViewBag.Tipos" class="form-select"
+                            data-val-required="Seleccione un tipo de habitación.">
+                        <option value="">-- Seleccione un tipo --</option>
+                    </select>
+                    <span asp-validation-for="TipoHabitacionId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Piso" class="form-label">Piso</label>
+                    <input asp-for="Piso" class="form-control" type="number" min="1" max="50"
+                           data-val-required="Indique el piso." />
+                    <span asp-validation-for="Piso" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <a asp-action="Index" class="btn btn-link">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
